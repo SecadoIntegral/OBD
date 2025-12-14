@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBD 1412</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo i {
+            font-size: 2rem;
+        }
+
+        .filters-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .filter-group {
+            margin-bottom: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #f0f2f5;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-option:hover {
+            background-color: #e2e6ea;
+        }
+
+        .filter-option.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .data-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .data-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .card-badge {
+            background-color: var(--success-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .card-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .card-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .field-label {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .field-value {
+            font-size: 1rem;
+            color: var(--dark-color);
+            word-break: break-word;
+        }
+
+        .results-info {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e7f5ff;
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .no-results h3 {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .mobile-controls {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            padding: 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+
+        .mobile-controls .btn {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                text-align: center;
+            }
+            
+            .filter-options {
+                justify-content: center;
+            }
+            
+            .filter-actions {
+                flex-direction: column;
+            }
+            
+            .results-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            
+            .card-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .mobile-controls {
+                display: flex;
+                gap: 10px;
+            }
+            
+            body {
+                padding-bottom: 80px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .cards-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header-content {
+                flex-direction: row;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .cards-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .card-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>OBD 1412</span>
+                </div>
+                <div>
+                    <p>Filtra por nombre o centro para visualizar los datos</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="nameFilter"><i class="fas fa-user"></i> Buscar por Nombre(s)</label>
+                <input type="text" id="nameFilter" class="filter-input" placeholder="Ej: Juan Pérez, María López">
+                <div class="filter-options" id="nameOptions"></div>
+            </div>
+            
+            <div class="filter-group">
+                <label for="centerFilter"><i class="fas fa-building"></i> Buscar por Centro</label>
+                <input type="text" id="centerFilter" class="filter-input" placeholder="Ej: Centro A, Centro B">
+                <div class="filter-options" id="centerOptions"></div>
+            </div>
+            
+            <div class="filter-actions">
+                <button id="applyFilters" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Aplicar Filtros
+                </button>
+                <button id="clearFilters" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Limpiar Filtros
+                </button>
+            </div>
+        </div>
+
+        <div class="results-info">
+            <div id="resultsCount">Cargando datos...</div>
+            <div id="activeFilters"></div>
+        </div>
+
+        <div id="loading" class="loading">
+            <i class="fas fa-spinner"></i>
+            <p>Cargando datos desde Google Sheets...</p>
+        </div>
+
+        <div id="cardsContainer" class="cards-container"></div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <i class="fas fa-search"></i>
+            <h3>No se encontraron resultados</h3>
+            <p>Intenta con otros términos de búsqueda o limpia los filtros</p>
+        </div>
+    </main>
+
+    <div class="mobile-controls">
+        <button id="mobileFilterBtn" class="btn btn-primary">
+            <i class="fas fa-filter"></i> Filtrar
+        </button>
+        <button id="mobileClearBtn" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Limpiar
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Variables globales
+            let allData = [];
+            let uniqueNames = [];
+            let uniqueCenters = [];
+            let currentFilters = {
+                names: [],
+                centers: []
+            };
+            
+            // Elementos del DOM
+            const nameFilter = document.getElementById('nameFilter');
+            const centerFilter = document.getElementById('centerFilter');
+            const nameOptions = document.getElementById('nameOptions');
+            const centerOptions = document.getElementById('centerOptions');
+            const applyFiltersBtn = document.getElementById('applyFilters');
+            const clearFiltersBtn = document.getElementById('clearFilters');
+            const cardsContainer = document.getElementById('cardsContainer');
+            const loadingElement = document.getElementById('loading');
+            const noResultsElement = document.getElementById('noResults');
+            const resultsCount = document.getElementById('resultsCount');
+            const activeFilters = document.getElementById('activeFilters');
+            const mobileFilterBtn = document.getElementById('mobileFilterBtn');
+            const mobileClearBtn = document.getElementById('mobileClearBtn');
+            
+            // URL del archivo CSV
+            const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRp6o1Up8NThHq951Xf5VztvzxmZs4wbn0KTvEcFZ2HzOLbQTljpUVo1Lj-Yl5q-mBIbKb_CLoeCX19/pub?gid=655314166&single=true&output=csv';
+            
+            // Cargar y procesar los datos
+            async function loadData() {
+                try {
+                    loadingElement.style.display = 'block';
+                    cardsContainer.innerHTML = '';
+                    
+                    const response = await fetch(csvUrl);
+                    const csvText = await response.text();
+                    
+                    // Parsear el CSV
+                    const rows = csvText.split('\n');
+                    const headers = rows[0].split(',').map(header => header.trim());
+                    
+                    // Mapear los encabezados
+                    const headerMap = {
+                        'Centro': 'centro',
+                        'Nombre': 'nombre',
+                        'Fe.contabilización': 'fecha_contabilizacion',
+                        'Lote': 'lote',
+                        'Referencia': 'referencia',
+                        'Cantidad': 'cantidad',
+                        'Texto breve de material': 'texto_material',
+                        'Pedido': 'pedido',
+                        'Documento material': 'documento_material',
+                        'Material': 'material'
+                    };
+                    
+                    // Crear array de objetos
+                    allData = [];
+                    uniqueNames = new Set();
+                    uniqueCenters = new Set();
+                    
+                    for (let i = 1; i < rows.length; i++) {
+                        if (rows[i].trim() === '') continue;
+                        
+                        const values = parseCSVRow(rows[i]);
+                        const item = {};
+                        
+                        headers.forEach((header, index) => {
+                            const key = headerMap[header] || header.toLowerCase().replace(/\./g, '_').replace(/ /g, '_');
+                            item[key] = values[index] ? values[index].trim() : '';
+                        });
+                        
+                        // Validar que el item tenga datos básicos
+                        if (item.nombre && item.centro) {
+                            allData.push(item);
+                            uniqueNames.add(item.nombre);
+                            uniqueCenters.add(item.centro);
+                        }
+                    }
+                    
+                    // Convertir Sets a Arrays
+                    uniqueNames = Array.from(uniqueNames).sort();
+                    uniqueCenters = Array.from(uniqueCenters).sort();
+                    
+                    // Renderizar opciones de filtro
+                    renderFilterOptions();
+                    
+                    // Mostrar todos los datos inicialmente
+                    filterData();
+                    
+                    loadingElement.style.display = 'none';
+                    
+                } catch (error) {
+                    console.error('Error al cargar los datos:', error);
+                    loadingElement.innerHTML = `
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error al cargar los datos. Por favor, inténtalo de nuevo más tarde.</p>
+                    `;
+                }
+            }
+            
+            // Función para parsear filas CSV considerando comas dentro de comillas
+            function parseCSVRow(row) {
+                const values = [];
+                let insideQuotes = false;
+                let currentValue = '';
+                
+                for (let i = 0; i < row.length; i++) {
+                    const char = row[i];
+                    
+                    if (char === '"') {
+                        insideQuotes = !insideQuotes;
+                    } else if (char === ',' && !insideQuotes) {
+                        values.push(currentValue);
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                
+                values.push(currentValue);
+                return values;
+            }
+            
+            // Renderizar opciones de filtro como chips
+            function renderFilterOptions() {
+                // Limpiar opciones previas
+                nameOptions.innerHTML = '';
+                centerOptions.innerHTML = '';
+                
+                // Mostrar solo algunos nombres y centros como opciones
+                const sampleNames = uniqueNames.slice(0, 8);
+                const sampleCenters = uniqueCenters.slice(0, 8);
+                
+                sampleNames.forEach(name => {
+                    const option = document.createElement('div');
+                    option.className = 'filter-option';
+                    option.textContent = name;
+                    option.dataset.value = name;
+                    option.addEventListener('click', () => toggleFilterOption('names', name, option));
+                    nameOptions.appendChild(option);
+                });
+                
+                sampleCenters.forEach(center => {
+                    const option = document.createElement('div');
+                    option.className = 'filter-option';
+                    option.textContent = center;
+                    option.dataset.value = center;
+                    option.addEventListener('click', () => toggleFilterOption('centers', center, option));
+                    centerOptions.appendChild(option);
+                });
+            }
+            
+            // Alternar opción de filtro
+            function toggleFilterOption(filterType, value, element) {
+                const index = currentFilters[filterType].indexOf(value);
+                
+                if (index === -1) {
+                    // Añadir al filtro
+                    currentFilters[filterType].push(value);
+                    element.classList.add('active');
+                } else {
+                    // Quitar del filtro
+                    currentFilters[filterType].splice(index, 1);
+                    element.classList.remove('active');
+                }
+                
+                // Actualizar campos de texto
+                updateFilterInputs();
+            }
+            
+            // Actualizar campos de texto con los filtros seleccionados
+            function updateFilterInputs() {
+                nameFilter.value = currentFilters.names.join(', ');
+                centerFilter.value = currentFilters.centers.join(', ');
+            }
+            
+            // Filtrar datos según los filtros actuales
+            function filterData() {
+                let filteredData = allData;
+                
+                // Aplicar filtros si existen
+                if (currentFilters.names.length > 0) {
+                    filteredData = filteredData.filter(item => 
+                        currentFilters.names.some(name => 
+                            item.nombre.toLowerCase().includes(name.toLowerCase())
+                        )
+                    );
+                }
+                
+                if (currentFilters.centers.length > 0) {
+                    filteredData = filteredData.filter(item => 
+                        currentFilters.centers.some(center => 
+                            item.centro.toLowerCase().includes(center.toLowerCase())
+                        )
+                    );
+                }
+                
+                // Actualizar interfaz
+                updateResultsInfo(filteredData.length);
+                renderCards(filteredData);
+            }
+            
+            // Actualizar información de resultados
+            function updateResultsInfo(count) {
+                resultsCount.textContent = `${count} resultado(s) encontrado(s)`;
+                
+                // Mostrar filtros activos
+                const activeFiltersArray = [];
+                if (currentFilters.names.length > 0) {
+                    activeFiltersArray.push(`Nombres: ${currentFilters.names.join(', ')}`);
+                }
+                if (currentFilters.centers.length > 0) {
+                    activeFiltersArray.push(`Centros: ${currentFilters.centers.join(', ')}`);
+                }
+                
+                if (activeFiltersArray.length > 0) {
+                    activeFilters.innerHTML = `<strong>Filtros activos:</strong> ${activeFiltersArray.join(' | ')}`;
+                } else {
+                    activeFilters.innerHTML = '';
+                }
+            }
+            
+            // Renderizar tarjetas con los datos
+            function renderCards(data) {
+                cardsContainer.innerHTML = '';
+                
+                if (data.length === 0) {
+                    noResultsElement.style.display = 'block';
+                    return;
+                }
+                
+                noResultsElement.style.display = 'none';
+                
+                data.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'data-card';
+                    
+                    // Formatear fecha si existe
+                    let fechaFormateada = item.fecha_contabilizacion || 'No disponible';
+                    if (fechaFormateada.includes('/')) {
+                        const partes = fechaFormateada.split('/');
+                        if (partes.length === 3) {
+                            fechaFormateada = `${partes[0]}/${partes[1]}/${partes[2]}`;
+                        }
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="card-header">
+                            <div class="card-title">${item.nombre}</div>
+                            <div class="card-badge">${item.centro}</div>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-field">
+                                <span class="field-label">Fecha contabilización:</span>
+                                <span class="field-value">${fechaFormateada}</span>
+                            </div>
+                            <div class="card-field">
+                                <span class="field-label">Lote:</span>
+                                <span class="field-value">${item.lote || 'N/A'}</span>
+                            </div>
+                            <div class="card-field">
+                                <span class="field-label">Referencia:</span>
+                                <span class="field-value">${item.referencia || 'N/A'}</span>
+                            </div>
+                            <div class="card-field">
+                                <span class="field-label">Cantidad:</span>
+                                <span class="field-value">${item.cantidad || 'N/A'}</span>
+                            </div>
+                            <div class="card-field">
+                                <span class="field-label">Texto material:</span>
+                                <span class="field-value">${item.texto_material || 'N/A'}</span>
+                            </div>
+                            <div class="card-field">
+                                <span class="field-label">Pedido:</span>
+                                <span class="field-value">${item.pedido || 'N/A'}</span>
+                            </div>
+                            <div class="card-field">
+                                <span class="field-label">Documento material:</span>
+                                <span class="field-value">${item.documento_material || 'N/A'}</span>
+                            </div>
+                            <div class="card-field">
+                                <span class="field-label">Material:</span>
+                                <span class="field-value">${item.material || 'N/A'}</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    cardsContainer.appendChild(card);
+                });
+            }
+            
+            // Procesar entrada de filtros desde los campos de texto
+            function processFilterInputs() {
+                // Procesar nombres
+                const namesText = nameFilter.value.trim();
+                if (namesText) {
+                    const namesArray = namesText.split(',').map(name => name.trim()).filter(name => name !== '');
+                    currentFilters.names = [...new Set(namesArray)];
+                } else {
+                    currentFilters.names = [];
+                }
+                
+                // Procesar centros
+                const centersText = centerFilter.value.trim();
+                if (centersText) {
+                    const centersArray = centersText.split(',').map(center => center.trim()).filter(center => center !== '');
+                    currentFilters.centers = [...new Set(centersArray)];
+                } else {
+                    currentFilters.centers = [];
+                }
+                
+                // Actualizar opciones visuales
+                updateVisualFilterOptions();
+            }
+            
+            // Actualizar opciones visuales de filtro según los valores actuales
+            function updateVisualFilterOptions() {
+                // Actualizar opciones de nombre
+                const nameOptionsElements = nameOptions.querySelectorAll('.filter-option');
+                nameOptionsElements.forEach(option => {
+                    if (currentFilters.names.includes(option.dataset.value)) {
+                        option.classList.add('active');
+                    } else {
+                        option.classList.remove('active');
+                    }
+                });
+                
+                // Actualizar opciones de centro
+                const centerOptionsElements = centerOptions.querySelectorAll('.filter-option');
+                centerOptionsElements.forEach(option => {
+                    if (currentFilters.centers.includes(option.dataset.value)) {
+                        option.classList.add('active');
+                    } else {
+                        option.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Limpiar todos los filtros
+            function clearFilters() {
+                currentFilters.names = [];
+                currentFilters.centers = [];
+                nameFilter.value = '';
+                centerFilter.value = '';
+                updateVisualFilterOptions();
+                filterData();
+            }
+            
+            // Event Listeners
+            applyFiltersBtn.addEventListener('click', () => {
+                processFilterInputs();
+                filterData();
+            });
+            
+            clearFiltersBtn.addEventListener('click', clearFilters);
+            
+            mobileFilterBtn.addEventListener('click', () => {
+                processFilterInputs();
+                filterData();
+                // Desplazarse hacia arriba para ver los resultados en móvil
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            mobileClearBtn.addEventListener('click', clearFilters);
+            
+            // Permitir usar Enter en los campos de filtro
+            nameFilter.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    processFilterInputs();
+                    filterData();
+                }
+            });
+            
+            centerFilter.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    processFilterInputs();
+                    filterData();
+                }
+            });
+            
+            // Cargar datos al iniciar
+            loadData();
+        });
+    </script>
+</body>
+</html>
